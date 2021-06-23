@@ -6,7 +6,6 @@ use std::{fmt, rc::Rc};
 
 #[allow(non_camel_case_types)]
 struct player<'a> {
-    //name: String,
     name: &'a str,
     mmr: i32,
 }
@@ -20,62 +19,8 @@ impl<'a> fmt::Display for player<'a> {
 
 
 fn get_players<'a>() -> Vec<player<'a>> {
-    /*let players = vec![
-        player{
-            name: "Kipperacer".to_owned(),
-            mmr: 2000
-        },
-        player{
-            name: "Not Brad".to_owned(),
-            mmr: 3900
-        },
-        player{
-            name: "Aayan".to_owned(),
-            mmr: 1900
-        },
-        player{
-            name: "hans solo#6857".to_owned(),
-            mmr: 2800
-        },
-        player{
-            name: "V4lhallaRSL".to_owned(),
-            mmr: 3000
-        },
-        player{
-            name: "hans solo#6857".to_owned(),
-            mmr: 2800
-        },
-        player{
-            name: "King Size Ultra Krabby Supreme (Snake)".to_owned(),
-            mmr: 1900
-        },
-        player{
-            name: "r1sen__".to_owned(),
-            mmr: 2400
-        },
-        player{
-            name: "yogurthb".to_owned(),
-            mmr: 2800
-        },
-        player{
-            name: "Dexterity.none".to_owned(),
-            mmr: 2300
-        },
-        player{
-            name: "4000dpi".to_owned(),
-            mmr: 1800
-        },
-        player{
-            name: "crypto".to_owned(),
-            mmr: 2600
-        },
-        player{
-            name: "renaxla".to_owned(),
-            mmr: 2400
-        }
-    ];*/
 
-    let players = vec![
+    let playerlist = vec![
         player{
             name: "Kipperacer",
             mmr: 2000
@@ -134,7 +79,7 @@ fn get_players<'a>() -> Vec<player<'a>> {
         println!("{}", p);
     }*/
     
-    players
+    playerlist
 }
 
 fn main() {
@@ -156,16 +101,12 @@ fn main() {
     let mut max_team_diff = 1000;
     let not_allowed_sameteam_idxs = get_not_allowed_sameteam_idxs(player_mmrs.clone(), max_team_diff);
 
-    //let _players_by_idx: Vec<usize> = (0..num_players).collect();
     let max_match_diff = 0;
 
     let result = solver(num_players, player_mmrs, max_match_diff, not_allowed_sameteam_idxs);
 
-    //assert_eq!(&result.err(), &Some(ResolutionError::Infeasible));
-
     match result {
         Ok(teams) => {
-            //println!("team1: {:?}, team2: {:?}", teams.0, teams.1)
             println!("team 1:");
             
             /*for i in teams.0.into_iter() {
@@ -214,8 +155,6 @@ fn solver(num_players: usize, mmr_vals: Box<[i32]>, max_match_diff: i32, not_all
 
     let z: Expression = x - y;
     
-    //let max_team_members = vars.add(variable().min(5).max(5));
-    //let binary_true = vars.add(variable().binary().min(1));
     
     let mut model = vars.minimise(&z).using(default_solver);
 
@@ -240,7 +179,6 @@ fn solver(num_players: usize, mmr_vals: Box<[i32]>, max_match_diff: i32, not_all
 
     let result = model.solve();
     
-    //result    
 
     //if result == CoinCbcSolution {
     match result {
@@ -309,7 +247,8 @@ fn get_not_allowed_sameteam_idxs(mmr_vals: Box<[i32]>, max_team_diff: i32) -> Ve
         }
 
         for i1 in p1_idxs {
-            for &i2 in p2_idxs.iter() {
+            let p2_idxs_tmp = p2_idxs.clone();
+            for i2 in p2_idxs_tmp {
                 not_allowed_sameteam.push((i1, i2))
             }
         }
