@@ -221,40 +221,20 @@ fn solver(num_players: usize, mmr_vals: Box<[i32]>, max_match_diff: i32, not_all
 }
 
 
-
+#[inline(always)]
 fn get_not_allowed_sameteam_idxs(mmr_vals: Box<[i32]>, max_team_diff: i32) -> Vec<(usize, usize)> {
-    
-    let mut not_allowed_sameteam: Vec<(usize, usize)> = Vec::new();
 
-    let pairs_diff_too_big = mmr_vals
+    let not_allowed_sameteam = mmr_vals
         .iter()
+        .enumerate()
         .combinations(2)
-        .filter(|x| (x[0] - x[1]).abs() > max_team_diff);
-
-
-    for invalid_pair in pairs_diff_too_big {
-
-        let (p1, p2) = (invalid_pair[0], invalid_pair[1]);
-        let mut p1_idxs: Vec<usize> = Vec::with_capacity(4);
-        let mut p2_idxs: Vec<usize> = Vec::with_capacity(4);
-
-        for (i, x) in mmr_vals.iter().enumerate() {
-            if x == p1 {
-                p1_idxs.push(i);
-            } else if x == p2 {
-                p2_idxs.push(i);
-            }
-        }
-
-        for i1 in p1_idxs {
-            let p2_idxs_tmp = p2_idxs.clone();
-            for i2 in p2_idxs_tmp {
-                not_allowed_sameteam.push((i1, i2))
-            }
-        }
-    }
-
-    //println!("{:?}", not_allowed_sameteam)
+        .filter(|x| (x[0].1 - x[1].1).abs() > max_team_diff)
+        .map(|x|
+            (x[0].0, x[1].0)
+        )
+        .collect::<Vec<(usize, usize)>>();
+    
+    //println!("not_allowed_sameteam: {:?}", not_allowed_sameteam);
     not_allowed_sameteam
 }
 
