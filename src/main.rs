@@ -2,7 +2,7 @@
 use itertools::Itertools;
 use good_lp::{constraint, default_solver, Solution, SolverModel, Expression, variable, ProblemVariables};
 use good_lp::solvers::ResolutionError;
-use std::{fmt, rc::Rc};
+use std::fmt;
 
 #[allow(non_camel_case_types)]
 struct player<'a> {
@@ -86,24 +86,21 @@ fn main() {
     let playerlist = get_players();
     let num_players = playerlist.len();
 
-    let mut player_names_mut: Vec<&str> = Vec::with_capacity(num_players);
-    let mut player_mmrs_mut: Vec<i32> = Vec::with_capacity(num_players);
-
-    for p in playerlist.iter() {
-        player_names_mut.push(p.name);
-        player_mmrs_mut.push(p.mmr);
-    }
-    
-    let _player_names = player_names_mut.into_boxed_slice();
-    let player_mmrs = player_mmrs_mut.into_boxed_slice();
-
+    let player_mmrs = playerlist.iter().map(|x| x.mmr).collect::<Box<[i32]>>();
 
     let mut max_team_diff = 1000;
-    let not_allowed_sameteam_idxs = get_not_allowed_sameteam_idxs(player_mmrs.clone(), max_team_diff);
-
     let max_match_diff = 0;
 
-    let result = solver(num_players, player_mmrs, max_match_diff, not_allowed_sameteam_idxs);
+    let not_allowed_sameteam_idxs = player_mmrs
+        .iter()
+        .enumerate()
+        .combinations(2)
+        .filter(|x| (x[0].1 - x[1].1).abs() > max_team_diff)
+        .map(|x| (x[0].0, x[1].0) )
+        .collect::<Vec<(usize, usize)>>();
+
+
+    let result = solver(num_players, &player_mmrs, max_match_diff, not_allowed_sameteam_idxs);
 
     match result {
         Ok(teams) => {
@@ -126,9 +123,8 @@ fn main() {
 
         }
         Err(e) if e == ResolutionError::Infeasible => {
-            println!("Infeasible!")
-            /*max_team_diff = 1100;
-            result = solver(players_by_idx, num_players, player_mmrs, max_match_diff, not_allowed_sameteam_idxs);*/
+            println!("Infeasible!");
+            max_team_diff = 1100;
         }
         Err(e) => panic!(e)
     }
@@ -141,7 +137,7 @@ fn main() {
 
 
 
-fn solver(num_players: usize, mmr_vals: Box<[i32]>, max_match_diff: i32, not_allowed_sameteam_idxs: Vec<(usize, usize)>) -> Result<([usize;5], [usize;5]), ResolutionError> {
+fn solver(num_players: usize, mmr_vals: &[i32], max_match_diff: i32, not_allowed_sameteam_idxs: Vec<(usize, usize)>) -> Result<([usize;5], [usize;5]), ResolutionError> {
 
     let mut vars = ProblemVariables::new();
 
@@ -180,7 +176,6 @@ fn solver(num_players: usize, mmr_vals: Box<[i32]>, max_match_diff: i32, not_all
     let result = model.solve();
     
 
-    //if result == CoinCbcSolution {
     match result {
         Ok(solution) => {
             let mut team1: [usize; 5] = [0; 5];
@@ -214,31 +209,7 @@ fn solver(num_players: usize, mmr_vals: Box<[i32]>, max_match_diff: i32, not_all
 
         } 
         Err(e) => {
-            //println!("{}", e);
             Err(e)
         }
     }
 }
-
-
-#[inline(always)]
-fn get_not_allowed_sameteam_idxs(mmr_vals: Box<[i32]>, max_team_diff: i32) -> Vec<(usize, usize)> {
-
-    let not_allowed_sameteam = mmr_vals
-        .iter()
-        .enumerate()
-        .combinations(2)
-        .filter(|x| (x[0].1 - x[1].1).abs() > max_team_diff)
-        .map(|x|
-            (x[0].0, x[1].0)
-        )
-        .collect::<Vec<(usize, usize)>>();
-    
-    //println!("not_allowed_sameteam: {:?}", not_allowed_sameteam);
-    not_allowed_sameteam
-}
-
-
-//fn get_chosen_players() -> ([usize;5], [usize;5]) {
-    
-//}
