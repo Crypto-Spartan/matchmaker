@@ -1,7 +1,11 @@
 [package]
 name = "matchmaker"
+description = "fair team generation for multiplayer games"
 version = "0.1.1"
 authors = ["Crypto-Spartan"]
+homepage = "https://github.com/Crypto-Spartan/matchmaker"
+repository = "https://github.com/Crypto-Spartan/matchmaker"
+readme = "README.md"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -13,3 +17,4 @@ coin_cbc = "0.1.5"
 
 [profile.release]
 lto = true
+codegen-units=1
